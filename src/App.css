@@ -22,8 +22,8 @@ body {
 }
 
 .app {
-  width: 100vw; /* Full viewport width */
-  min-height: 100vh;
+  width: 100%; /* Full viewport width */
+  min-height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -164,7 +164,12 @@ body {
   }
   
   .app-header h1 {
-    font-size: 2rem;
+    display: flex;
+    flex-direction: column; /* Stack icon above text */
+    align-items: center;
+    text-align: center;
+    line-height: 1.2; /* Tighter line spacing */
+    
   }
   
   .main-content {

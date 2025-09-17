@@ -6,12 +6,18 @@ function FoodSuggestions({ personalInfo, trainingInfo, macroResults }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('all')
+  
+  // New state for enhanced features
+  const [availableFoods, setAvailableFoods] = useState('')
+  const [chatMessages, setChatMessages] = useState([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+  const [rerollCount, setRerollCount] = useState(0)
 
-
-  // Get OpenAI API key from Vite env
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY
 
-  // Generate AI food suggestions
+  // Original generate suggestions function
   const generateSuggestions = async () => {
     if (!macroResults) return
 
@@ -19,13 +25,9 @@ function FoodSuggestions({ personalInfo, trainingInfo, macroResults }) {
     setError(null)
 
     try {
-      // Create a detailed prompt for OpenAI
       const prompt = createPrompt(personalInfo, trainingInfo, macroResults)
-      
       console.log('Sending prompt to OpenAI:', prompt)
 
-
-      // Use fetch to call OpenAI API
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -45,33 +47,49 @@ function FoodSuggestions({ personalInfo, trainingInfo, macroResults }) {
             }
           ],
           max_tokens: 800,
-          temperature: 0.7
+          temperature: 0.8 // Moderate creativity for variety
         })
       })
 
-      if (!response.ok) throw new Error('OpenAI API error: ' + response.status)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please try again in a few minutes.')
+        } else if (response.status === 401) {
+          throw new Error('Invalid API key. Please check your OpenAI API key.')
+        } else {
+          throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+        }
+      }
+
       const data = await response.json()
       const aiResponse = data.choices[0].message.content
       console.log('OpenAI Response:', aiResponse)
 
-      // Parse the AI response
       const parsedSuggestions = parseAIResponse(aiResponse)
       setSuggestions(parsedSuggestions)
 
     } catch (err) {
       console.error('OpenAI API Error:', err)
-      setError(`Failed to get AI suggestions: ${err.message}`)
-      
-      // Fallback to static suggestions if API fails
+      setError(err.message)
       setSuggestions(getFallbackSuggestions())
     } finally {
       setLoading(false)
     }
   }
 
-  // Create a detailed prompt for the AI
+  // Enhanced prompt creation with available foods
   const createPrompt = (personal, training, macros) => {
+    const availableFoodsText = availableFoods.trim() ? `
+    
+IMPORTANT: The user has these foods available: ${availableFoods}
+Please PRIORITIZE these foods in your suggestions and show specific ways to use them to meet the macro targets.
+If possible, build meal ideas around these available ingredients.
+    ` : ''
+
     return `
+${availableFoodsText}
+
 Create food suggestions for a person with these details:
 - ${personal.age} year old ${personal.gender}
 - ${personal.weight} lbs, ${personal.feet}'${personal.inches}"
@@ -99,27 +117,105 @@ Categories should include:
 5. Complete meal ideas for their goal
 
 Focus on whole foods, be specific with food names, and consider their ${macros.goalName} goal.
+${availableFoods.trim() ? 'Remember to incorporate the available foods listed above wherever possible.' : ''}
 `
   }
 
-  // Parse AI response (handle potential JSON issues)
+  // Chat functionality
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || !macroResults) return
+
+    const userMessage = chatInput.trim()
+    setChatInput('')
+    setChatLoading(true)
+
+    // Add user message to chat
+    const newMessages = [...chatMessages, { role: 'user', content: userMessage }]
+    setChatMessages(newMessages)
+
+    try {
+      const chatPrompt = createChatPrompt(userMessage, availableFoods, macroResults, newMessages.slice(-6)) // Last 6 messages for context
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful nutrition assistant. Provide practical, specific advice about food and macro planning. Keep responses concise but helpful.'
+            },
+            {
+              role: 'user',
+              content: chatPrompt
+            }
+          ],
+          max_tokens: 400,
+          temperature: 0.7
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to get chat response')
+
+      const data = await response.json()
+      const aiResponse = data.choices[0].message.content
+
+      // Add AI response to chat
+      setChatMessages([...newMessages, { role: 'assistant', content: aiResponse }])
+
+    } catch (err) {
+      console.error('Chat Error:', err)
+      setChatMessages([...newMessages, { 
+        role: 'assistant', 
+        content: 'Sorry, I had trouble responding. Please try again.' 
+      }])
+    } finally {
+      setChatLoading(false)
+    }
+  }
+
+  const createChatPrompt = (userQuestion, foods, macros, recentMessages) => {
+    const context = recentMessages.map(msg => 
+      `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+    ).join('\n')
+
+    return `
+User's macro targets: ${macros.calories} calories, ${macros.protein}g protein, ${macros.carbs}g carbs, ${macros.fats}g fats
+User's goal: ${macros.goalName}
+Available foods: ${foods || 'Not specified'}
+
+Recent conversation:
+${context}
+
+Current question: ${userQuestion}
+
+Please provide helpful, specific advice about nutrition and meal planning based on their goals and available foods.
+`
+  }
+
+  // Reroll function
+  const rerollSuggestions = () => {
+    setRerollCount(prev => prev + 1)
+    generateSuggestions(true)
+  }
+
+  // All your existing helper functions remain the same
   const parseAIResponse = (response) => {
     try {
-      // Clean up the response (remove markdown formatting if present)
       const cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '')
       const parsed = JSON.parse(cleanResponse)
       return parsed.suggestions || []
     } catch (err) {
       console.error('Failed to parse AI response:', err)
-      
-      // Try to extract suggestions manually if JSON parsing fails
       return extractSuggestionsManually(response)
     }
   }
 
-  // Manual extraction if JSON parsing fails
   const extractSuggestionsManually = (response) => {
-    // Simple fallback - look for patterns in the response
     const lines = response.split('\n')
     const suggestions = []
     
@@ -147,7 +243,6 @@ Focus on whole foods, be specific with food names, and consider their ${macros.g
     return suggestions
   }
 
-  // Fallback suggestions if API fails
   const getFallbackSuggestions = () => {
     const { protein, carbs, fats, goalName } = macroResults
     
@@ -173,7 +268,6 @@ Focus on whole foods, be specific with food names, and consider their ${macros.g
     ]
   }
 
-  // Filter suggestions by category
   const filteredSuggestions = selectedCategory === 'all' 
     ? suggestions 
     : suggestions.filter(s => s.category.toLowerCase().includes(selectedCategory))
@@ -205,12 +299,36 @@ Focus on whole foods, be specific with food names, and consider their ${macros.g
       </div>
 
       <div className="suggestions-controls">
+        {/* Available Foods Input - Always Visible */}
+        <div className="available-foods-section">
+          <div className="foods-input-container">
+            <label htmlFor="foods">Foods I have available (optional):</label>
+            <input
+              id="foods"
+              type="text"
+              value={availableFoods}
+              onChange={(e) => setAvailableFoods(e.target.value)}
+              placeholder="e.g., chicken, rice, broccoli, eggs..."
+              className="foods-input"
+            />
+          </div>
+        </div>
+
+        {/* Main Generate Button */}
         <button 
-          onClick={generateSuggestions}
+          onClick={() => generateSuggestions(false)}
           disabled={loading || !macroResults}
           className="generate-btn"
         >
           {loading ? '🤖 AI is thinking...' : '✨ Get AI Food Suggestions'}
+        </button>
+
+        {/* Chat Toggle - Always Visible */}
+        <button 
+          onClick={() => setShowChat(!showChat)}
+          className="chat-toggle-btn"
+        >
+          {showChat ? '📋 Hide Nutrition Chat' : '💬 Ask AI About Nutrition'}
         </button>
 
         {suggestions.length > 0 && (
@@ -227,6 +345,50 @@ Focus on whole foods, be specific with food names, and consider their ${macros.g
           </div>
         )}
       </div>
+
+      {/* Chat Interface - Can be toggled */}
+      {showChat && (
+        <div className="chat-interface">
+          <div className="chat-header">
+            <h3>Ask About Your Nutrition</h3>
+            <p>Ask specific questions about meal planning, portions, timing, and substitutions!</p>
+          </div>
+
+          <div className="chat-messages">
+            {chatMessages.map((message, index) => (
+              <div key={index} className={`message ${message.role}`}>
+                <div className="message-content">
+                  {message.content}
+                </div>
+              </div>
+            ))}
+            {chatLoading && (
+              <div className="message assistant">
+                <div className="message-content typing">AI is typing...</div>
+              </div>
+            )}
+          </div>
+
+          <div className="chat-input-area">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+              placeholder="Ask about meal ideas, portions, timing, substitutions..."
+              className="chat-input"
+              disabled={chatLoading}
+            />
+            <button 
+              onClick={sendChatMessage}
+              disabled={!chatInput.trim() || chatLoading}
+              className="send-btn"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="error-message">

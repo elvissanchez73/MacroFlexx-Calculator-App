@@ -1,3 +1,4 @@
+/* Enhanced FoodSuggestions CSS with new features */
 .food-suggestions {
   max-width: 1000px;
   margin: 0 auto;
@@ -41,12 +42,52 @@
   font-weight: 600;
 }
 
+/* Enhanced Controls Section */
 .suggestions-controls {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+/* Always Visible Foods Input Section */
+.available-foods-section {
+  width: 100%;
+  max-width: 600px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 1.5rem;
+  border-radius: 15px;
+  border: 2px solid #e0f2fe;
+  box-shadow: 0 2px 10px rgba(14, 165, 233, 0.1);
+}
+
+.foods-input-container label {
+  display: block;
+  color: #0f172a;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.foods-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  color:black;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.foods-input:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  transform: translateY(-1px);
 }
 
 .generate-btn {
@@ -73,8 +114,54 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
+/* New Action Buttons */
+.reroll-btn {
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(237, 137, 54, 0.3);
+}
+
+.reroll-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(237, 137, 54, 0.4);
+}
+
+.reroll-btn:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.chat-toggle-btn {
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(128, 90, 213, 0.3);
+}
+
+.chat-toggle-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(128, 90, 213, 0.4);
+}
+
+/* Category Filters */
 .category-filters {
   display: flex;
   gap: 0.5rem;
@@ -104,6 +191,164 @@
   border-color: #667eea;
 }
 
+/* Chat Interface Styles */
+.chat-interface {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.chat-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.chat-header h3 {
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.chat-header p {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.available-foods-input {
+  margin-bottom: 1.5rem;
+}
+
+.available-foods-input label {
+  display: block;
+  color: #4a5568;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.foods-input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.foods-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.chat-messages {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.message {
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.message:last-child {
+  margin-bottom: 0;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.assistant {
+  justify-content: flex-start;
+}
+
+.message-content {
+  max-width: 80%;
+  padding: 0.8rem 1rem;
+  border-radius: 15px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.message.user .message-content {
+  background: #667eea;
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.message.assistant .message-content {
+  background: #f7fafc;
+  color: #2d3748;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 5px;
+}
+
+.message-content.typing {
+  font-style: italic;
+  opacity: 0.8;
+  animation: typing 1.5s ease-in-out infinite;
+}
+
+@keyframes typing {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+}
+
+.chat-input-area {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 25px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.send-btn {
+  padding: 0.8rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 80px;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.send-btn:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Error Messages */
 .error-message {
   background: #fed7d7;
   color: #9b2c2c;
@@ -117,6 +362,7 @@
   margin: 0.5rem 0;
 }
 
+/* Suggestions Grid */
 .suggestions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -163,11 +409,13 @@
   font-size: 0.9rem;
   border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .food-item:hover {
   border-color: #667eea;
   background: #f0f4ff;
+  transform: translateY(-1px);
 }
 
 .macro-info {
@@ -221,10 +469,6 @@
 }
 
 /* Loading animation */
-.generate-btn:disabled {
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
 @keyframes pulse {
   0% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -255,6 +499,24 @@
     min-width: auto;
     width: 100%;
   }
+
+  .action-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .reroll-btn,
+  .chat-toggle-btn {
+    width: 100%;
+  }
+
+  .chat-input-area {
+    flex-direction: column;
+  }
+
+  .send-btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -264,5 +526,13 @@
   
   .food-suggestions {
     padding: 1rem;
+  }
+
+  .chat-interface {
+    padding: 1rem;
+  }
+
+  .message-content {
+    max-width: 90%;
   }
 }
