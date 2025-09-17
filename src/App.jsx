@@ -41,12 +41,12 @@ function App() {
         <h1>
           {/* Dumbbell SVG Icon - made much bigger */}
           <span style={{ verticalAlign: 'middle', marginRight: 20 }}>
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" aria-label="dumbbell" xmlns="http://www.w3.org/2000/svg">
-              <rect x="5" y="30" width="10" height="20" rx="2" fill="#222" />
-              <rect x="65" y="30" width="10" height="20" rx="2" fill="#222" />
-              <rect x="15" y="35" width="50" height="10" rx="2" fill="#666" />
-            </svg>
-          </span>
+  <img 
+    src="/firedumbell.png" 
+    alt="dumbbell with fire" 
+    style={{ width: '80px', height: '80px' }}
+  />
+</span>
           {appName}
         </h1>
         <p>Nutrition Macros Calculator</p>
