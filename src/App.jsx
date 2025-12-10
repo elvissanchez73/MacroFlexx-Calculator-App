@@ -49,7 +49,30 @@ function App() {
 </span>
           {appName}
         </h1>
-        <p>Nutrition Macros Calculator</p>
+        <p>🔥 Fuel Your Goals, Track Your Macros, Get Ripped 💪</p>
+        <div style={{ marginTop: '1rem' }}>
+          <a 
+            href="https://ko-fi.com/elvissanchez7311" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-block',
+              padding: '10px 20px',
+              background: 'linear-gradient(135deg, #ff5f6d 0%, #ffc371 100%)',
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '25px',
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              transition: 'transform 0.2s ease',
+              boxShadow: '0 4px 15px rgba(255, 95, 109, 0.3)'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            ☕ Support Me!
+          </a>
+        </div>
       </header>
       
       <main className="main-content">
@@ -92,7 +115,7 @@ function App() {
         <div className="about"> 
           <small>Created by</small>
           <a href="https://www.linkedin.com/in/elvis-sanchez-robles-6b35871a9" target="_blank" rel="noopener noreferrer"> 
-            <img alt="pfp" src="https://media.licdn.com/dms/image/v2/D4E03AQHE27HiC-xsJg/profile-displayphoto-crop_800_800/B4EZgzSjEDHgAQ-/0/1753207157962?e=1759363200&v=beta&t=athYR_EHSpgRFjO9OCsSbz4I6zZ2Rd3BTxbx3JXSMG4"/>
+            <img alt="pfp" src="me.jpeg"/>
             <p>Elvis Sánchez Robles</p>
             <i className="fa-brands fa-linkedin"></i>
           </a>
